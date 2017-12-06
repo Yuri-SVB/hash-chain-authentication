@@ -3,23 +3,23 @@ import time
 from functools import partial
 from multiprocessing import Pool
 
-MILESTONE = 10000000
+MILESTONE = 100000
 N_MILESTONES = 100
 
-def md5sum(filename1, filename2):
-    d = hashlib.md5()
+def sha512sum(filename1, filename2):
+    d = hashlib.sha512()
     with open(filename1, mode='rb') as f:
-        for buf in iter(partial(f.read, 128), b''):
+        for buf in iter(partial(f.read, 512), b''):
             d.update(buf)
     with open(filename2, mode='rb') as f:
-        for buf in iter(partial(f.read, 128), b''):
+        for buf in iter(partial(f.read, 512), b''):
             d.update(buf)
     return d
 
-def hash_chain(digest):
-    h = hashlib.md5(digest).digest()
-    for i in range(MILESTONE - 1):
-        h = hashlib.md5(h).digest()
+def hash_link(digest):
+    h = hashlib.sha512(digest).digest()
+    for i in range(MILESTONE):
+        h = hashlib.sha512(h).digest()
     return h
 
 def verify(k):
@@ -27,7 +27,7 @@ def verify(k):
     final = k[1]
     index = k[2]
     for i in range(MILESTONE):
-        h = hashlib.md5(h).digest()
+        h = hashlib.sha512(h).digest()
     if h == final:
         return "Okay!"
     else:
@@ -39,11 +39,11 @@ print("Creating hash chain...")
 
 t0 = time.time()
 
-h = md5sum('video.avi', 'key.dat').digest()
+h = sha512sum('video.avi', 'key.dat').digest()
 print("Initial:", h)
 hashes.append(h)
 for i in range(N_MILESTONES):
-    h = hash_chain(h)
+    h = hash_link(h)
     hashes.append(h)
     print("Milestone ", i, ": ", h, sep="")
 
